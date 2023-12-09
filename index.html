@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Scholar Productivity Search Engine</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        body {
+            margin: 20px;
+        }
+
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+
+        .autocomplete-dropdown {
+            border: 1px solid #ddd;
+            max-height: 150px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .author-option {
+            padding: 5px;
+            cursor: pointer;
+        }
+
+        .author-option:hover {
+            background-color: #eee;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Welcome to Google Scholar Productivity Search Engine</h1>
+    </header>
+
+    <section id="content">
+        <form action="/results" method="get">
+            <label for="author_name">Author Name:</label>
+            <input type="text" id="author_name" name="author_name" required>
+            <div class="autocomplete-dropdown" id="autocomplete-dropdown-0"></div>
+            <input type="submit" value="Submit">
+        </form>
+    </section>
+
+    <footer>
+        <p>&copy; Google Scholar Productivity Search Engine. All rights reserved.</p>
+    </footer>
+
+    <script>
+        let timeout = null;
+        document.getElementById("author_name").addEventListener("keyup", function() {
+            clearTimeout(timeout);
+
+            timeout = setTimeout(() => {
+                fetchSimilarAuthors(this.value);
+            }, 300);
+        });
+
+        function fetchSimilarAuthors(authorName) {
+            fetch(`/get_similar_authors?author_name=${encodeURIComponent(authorName)}`)
+                .then(response => response.json())
+                .then(authors => {
+                    let dropdown = document.getElementById('autocomplete-dropdown-0');
+                    dropdown.innerHTML = '';
+
+                    authors.forEach(author => {
+                        let div = createAuthorOption(author);
+                        dropdown.appendChild(div);
+                    });
+
+                    dropdown.style.display = authors.length > 0 ? 'block' : 'none';
+                });
+        }
+
+        function createAuthorOption(author) {
+            let div = document.createElement('div');
+            div.className = 'author-option';
+            div.textContent = author.name;
+            div.onclick = function() {
+                document.getElementById('author_name').value = author.name;
+                document.getElementById('autocomplete-dropdown-0').style.display = 'none';
+            };
+            return div;
+        }
+    </script>
+</body>
+
+</html>
+
+
+
